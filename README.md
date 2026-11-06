@@ -1,5 +1,7 @@
 # Display Sleep
 
+![Display Sleep — one click puts all displays to sleep](assets/banner.png)
+
 [![macOS](https://img.shields.io/badge/macOS-13%2B-blue)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
