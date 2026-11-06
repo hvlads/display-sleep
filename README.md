@@ -33,7 +33,7 @@ Existing "sleep display" shortcuts either lock the session, show a fake black ov
 ## Build & Install
 
 ```bash
-git clone https://github.com/<your-username>/display-sleep.git
+git clone https://github.com/hvlads/display-sleep.git
 cd display-sleep
 
 # Build the .app bundle
