@@ -8,8 +8,6 @@
 
 A tiny macOS menu bar utility: **one click on the icon puts every connected display to sleep**. No menus, no confirmations, no Dock icon — the Mac itself keeps running, so your servers, Docker containers and bots are never interrupted.
 
-[Русская версия README](README.ru.md)
-
 ## Why
 
 Existing "sleep display" shortcuts either lock the session, show a fake black overlay, or require scripting. Display Sleep uses the real hardware display-sleep mechanism — the same one triggered by `pmset displaysleepnow`:

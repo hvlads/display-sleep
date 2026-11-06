@@ -1,10 +1,10 @@
 import Cocoa
 
-/// Делегат приложения: создаёт NSStatusItem и обрабатывает клики.
+/// Application delegate: creates the NSStatusItem and handles clicks.
 ///
-/// Поведение:
-///  - Левый клик  → немедленно усыпить все дисплеи (без меню и подтверждений).
-///  - Правый клик → маленькое служебное меню: автозапуск при входе, выход.
+/// Behavior:
+///  - Left click  → immediately sleep all displays (no menus, no confirmations).
+///  - Right click → small service menu: launch at login toggle, quit.
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private var statusItem: NSStatusItem!
@@ -19,11 +19,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             accessibilityDescription: "Display Sleep"
         )
         button.image?.isTemplate = true
-        button.toolTip = "Display Sleep — клик: выключить экраны"
+        button.toolTip = "Display Sleep — click to sleep displays"
 
         button.target = self
         button.action = #selector(handleClick(_:))
-        // Реагируем и на левый, и на правый клик
+        // React to both left and right clicks
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
 
@@ -32,19 +32,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .rightMouseUp:
             showContextMenu()
         default:
-            // Левый клик: один клик — экраны спят. Никаких меню.
+            // Left click: one click — displays sleep. No menus.
             DisplaySleep.sleepDisplays()
         }
     }
 
-    // MARK: - Служебное меню (правый клик)
+    // MARK: - Service menu (right click)
 
     private func showContextMenu() {
         let menu = NSMenu()
         menu.delegate = self
 
         let loginItem = NSMenuItem(
-            title: "Запускать при входе",
+            title: "Launch at Login",
             action: #selector(toggleLaunchAtLogin),
             keyEquivalent: ""
         )
@@ -55,21 +55,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
-            title: "Выход",
+            title: "Quit",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
         quitItem.target = self
         menu.addItem(quitItem)
 
-        // Временно назначаем меню, показываем его и сразу снимаем,
-        // чтобы левый клик оставался «мгновенным действием».
+        // Temporarily attach the menu, show it, then detach it right away
+        // so the left click stays an instant action.
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
     }
 
-    /// После закрытия меню убираем его из statusItem,
-    /// иначе следующий левый клик откроет меню вместо сна дисплеев.
+    /// After the menu closes, remove it from the status item —
+    /// otherwise the next left click would open the menu instead of
+    /// sleeping the displays.
     func menuDidClose(_ menu: NSMenu) {
         statusItem.menu = nil
     }

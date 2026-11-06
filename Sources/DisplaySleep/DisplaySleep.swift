@@ -2,34 +2,32 @@ import CoreGraphics
 import Foundation
 import IOKit
 
-/// Перевод всех подключённых дисплеев в сон.
+/// Puts all connected displays to sleep.
 ///
-/// Основной путь — `/usr/bin/pmset displaysleepnow`: настоящий аппаратный
-/// сон панелей (не «чёрный экран»). Mac при этом продолжает работать —
-/// все фоновые процессы, Docker и серверы не затрагиваются. Пробуждение
-/// стандартное: любая клавиша или движение мыши. Прав администратора
-/// и дополнительных разрешений не требуется.
+/// Primary path — `/usr/bin/pmset displaysleepnow`: real hardware sleep of
+/// the panels (not a black overlay). The Mac keeps running — background
+/// processes, Docker and servers are not affected. Wake is standard: any
+/// key press or mouse movement. No admin rights or extra permissions
+/// are required.
 ///
-/// Нюанс macOS 26: сервис IOKit `IODisplayWrangler` со свойством
-/// `IORequestIdle` возвращает KERN_SUCCESS, но физически не усыпляет
-/// дисплеи, поэтому IOKit оставлен только как фолбэк.
+/// macOS 26 note: the IOKit `IODisplayWrangler` service with the
+/// `IORequestIdle` property returns KERN_SUCCESS but does not physically
+/// sleep the displays, so IOKit is kept only as a fallback.
 ///
-/// Защита от «фантомных» пробуждений: некоторые устройства ввода
-/// (например, игровые клавиатуры с подсветкой) способны отправить
-/// единичное HID-событие через долю секунды после засыпания дисплея,
-/// из-за чего экран мгновенно включается обратно. Поэтому через
-/// `verifyDelay` секунд приложение проверяет состояние дисплея через
-/// `CGDisplayIsAsleep` и при необходимости повторяет усыпление
-/// (не более `maxAttempts` раз).
+/// Phantom-wake guard: some input devices (e.g. gaming keyboards with
+/// backlighting) may emit a single HID event a fraction of a second after
+/// the displays fall asleep, instantly turning the screen back on. So after
+/// `verifyDelay` seconds the app checks the display state via
+/// `CGDisplayIsAsleep` and retries if needed (at most `maxAttempts` times).
 enum DisplaySleep {
 
     private static let maxAttempts = 3
     private static let verifyDelay: TimeInterval = 4.0
 
-    /// Защита от повторного входа, пока идёт цикл «сон → проверка».
+    /// Guards against re-entry while a "sleep → verify" cycle is running.
     private static var sequenceInProgress = false
 
-    /// Точка входа: вызывается по левому клику на иконке.
+    /// Entry point: called on left click of the menu bar icon.
     static func sleepDisplays() {
         guard !sequenceInProgress else { return }
         sequenceInProgress = true
@@ -48,17 +46,17 @@ enum DisplaySleep {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + verifyDelay) {
             if CGDisplayIsAsleep(CGMainDisplayID()) != 0 {
-                // Дисплеи спят — цикл завершён.
+                // Displays are asleep — cycle complete.
                 sequenceInProgress = false
             } else {
-                // Кто-то (устройство ввода) уже разбудил дисплей — повторяем.
+                // Something (an input device) already woke the display — retry.
                 performSleep(attempt: attempt + 1)
             }
         }
     }
 
-    /// Основной путь: системная команда, выполняется от имени текущего
-    /// пользователя, sudo не нужен.
+    /// Primary path: the system command, executed as the current user —
+    /// no sudo needed.
     @discardableResult
     private static func sleepViaPmset() -> Bool {
         let process = Process()
@@ -68,12 +66,12 @@ enum DisplaySleep {
             try process.run()
             return true
         } catch {
-            NSLog("DisplaySleep: не удалось запустить pmset: \(error.localizedDescription)")
+            NSLog("DisplaySleep: failed to launch pmset: \(error.localizedDescription)")
             return false
         }
     }
 
-    /// Запасной путь через IOKit (на случай, если pmset недоступен).
+    /// Fallback path via IOKit (in case pmset is unavailable).
     private static func sleepViaIOKit() {
         var iterator: io_iterator_t = 0
         let matching = IOServiceMatching("IODisplayWrangler")

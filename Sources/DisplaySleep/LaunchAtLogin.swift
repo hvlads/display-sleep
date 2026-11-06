@@ -1,11 +1,11 @@
 import Foundation
 import ServiceManagement
 
-/// Автозапуск при входе через SMAppService (macOS 13+).
+/// Launch at login via SMAppService (macOS 13+).
 ///
-/// Важно: регистрация работает только когда приложение собрано как
-/// настоящий .app-бандл и лежит в /Applications (или другой постоянной
-/// папке). При запуске бинарника напрямую из .build регистрация не сработает.
+/// Note: registration only works when the app is built as a real .app
+/// bundle and lives in /Applications (or another permanent folder).
+/// Running the binary directly from .build will not register it.
 final class LaunchAtLogin {
 
     var isEnabled: Bool {
@@ -22,9 +22,9 @@ final class LaunchAtLogin {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            // Не падаем: просто сообщаем в лог. Пользователь может включить
-            // автозапуск вручную: Системные настройки → Основные → Объекты входа.
-            NSLog("DisplaySleep: не удалось изменить автозапуск: \(error.localizedDescription)")
+            // Don't crash: just log. The user can enable launch at login
+            // manually in System Settings → General → Login Items.
+            NSLog("DisplaySleep: failed to change launch-at-login: \(error.localizedDescription)")
         }
     }
 }
