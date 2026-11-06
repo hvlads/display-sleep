@@ -5,6 +5,7 @@
 [![macOS](https://img.shields.io/badge/macOS-13%2B-blue)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Download](https://img.shields.io/github/v/release/hvlads/display-sleep?label=Download&color=brightgreen)](https://github.com/hvlads/display-sleep/releases/latest)
 
 A tiny macOS menu bar utility: **one click on the icon puts every connected display to sleep**. No menus, no confirmations, no Dock icon — the Mac itself keeps running, so your servers, Docker containers and bots are never interrupted.
 
